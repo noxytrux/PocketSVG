@@ -325,15 +325,25 @@ NSDictionary *svgParser::readAttributes()
     xmlTextReaderMoveToElement(_xmlReader);
 
     for(NSString *attr in attrs.allKeys) {
-        if([attrs[attr] isKindOfClass:[NSString class]] &&
-           ([attr isEqualToString:@"fill"] || [attr isEqualToString:@"stroke"]))
+
+        if ([attrs[attr] isKindOfClass:[NSString class]] && ([attr isEqualToString:@"fill"] || [attr isEqualToString:@"stroke"]))
         {
             if([attrs[attr] isEqual:@"none"]) {
+
                 CGColorSpaceRef const colorSpace = CGColorSpaceCreateDeviceRGB();
                 attrs[attr] = (__bridge_transfer id)CGColorCreate(colorSpace, (CGFloat[]) { 1, 1, 1, 0 });
                 CFRelease(colorSpace);
-            } else
+
+            } else if ([attrs[attr] containsString:@"url"] || [attrs[attr] containsString:@"URL"]) {
+
+                CGColorSpaceRef const colorSpace = CGColorSpaceCreateDeviceRGB();
+                attrs[attr] = (__bridge_transfer id)CGColorCreate(colorSpace, (CGFloat[]) { 0, 0, 0, 1 });
+                CFRelease(colorSpace);
+
+            } else {
+
                 attrs[attr] = (__bridge_transfer id)hexTriplet(attrs[attr]).CGColor();
+            }
         }
     }
 
